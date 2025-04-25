@@ -15,3 +15,6 @@ CA_FILE_SAVE_PATH = path.join("out", "CertificateAuthority")
 CA_CERT_FILE_NAME = "ca_certificate"
 CA_KEY_FILE_NAME = "ca_private_key"
 CA_KEY_FILE_PASSWORD = "nevimheslo123"
+
+# Normalized file temp directory
+FILE_TEMP_DIRECTORY = path.join("out", "temp")
