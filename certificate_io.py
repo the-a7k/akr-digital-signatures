@@ -9,7 +9,7 @@ import os
 class CertificateIO:
     def __init__(self):
         self.private_key = None  # Contains RSA key object
-        self.public_key = None   # Contains RSA key object
+        self.public_key =  None  # Contains RSA key object
         self.certificate = None  # Contains x509 certificate object
 
     def __str__(self):
@@ -40,8 +40,8 @@ class CertificateIO:
             f"\tLocality: {self.certificate.subject.get_attributes_for_oid(NameOID.LOCALITY_NAME)[0].value}\n"
             f"\tOrganization: {self.certificate.subject.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)[0].value}\n"
             f"\tCommon Name: {self.certificate.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value}\n"
-            f"\tNot Valid Before: {self.certificate.not_valid_before_utc}\n"
-            f"\tNot Valid After: {self.certificate.not_valid_after_utc}\n"
+            f"\tNot Valid Before: {self.certificate.not_valid_before_utc.astimezone()}\n"
+            f"\tNot Valid After: {self.certificate.not_valid_after_utc.astimezone()}\n"
             f"\tPublic Key Object: {self.public_key}\n"
             f"\tPrivate Key Object: {self.private_key}"
         )
@@ -77,7 +77,7 @@ class CertificateIO:
         self.file_create_directory(path)
 
         KEY_EXTENSION = ".pem"
-        full_path = path + file_name + KEY_EXTENSION
+        full_path = os.path.join(path, file_name + KEY_EXTENSION)
 
         with open(full_path, "wb") as key_file:
             if password is None:
@@ -96,6 +96,8 @@ class CertificateIO:
                         encryption_algorithm=serialization.BestAvailableEncryption(password.encode()),
                     )
                 )
+
+        return True
     
     def file_save_certificate(self, path, file_name, certificate=None):
         # Save certificate to .pem file
@@ -109,15 +111,21 @@ class CertificateIO:
         self.file_create_directory(path)
 
         CERT_EXTENSION = ".pem"
-        full_path = path + file_name + CERT_EXTENSION
+        full_path = os.path.join(path, file_name + CERT_EXTENSION)
 
         with open(full_path, "wb") as cert_file:
             cert_file.write(certificate.public_bytes(serialization.Encoding.PEM))
 
+        return True
+
     def file_load_private_key(self, path, file_name, password=None):
         # Load private key from .pem file
         KEY_EXTENSION = ".pem"
-        full_path = path + file_name + KEY_EXTENSION
+        full_path = os.path.join(path, file_name + KEY_EXTENSION)
+
+        if not os.path.isfile(full_path):
+            # File does not exist
+            return False
 
         self.file_create_directory(path)
         with open(full_path, "rb") as key_file:
@@ -131,11 +139,17 @@ class CertificateIO:
                     key_file.read(),
                     password = password.encode()
                 )
+                
+        return True
 
     def file_load_certificate(self, path, file_name):
         # Load certificate and its public key from .pem file
         CERT_EXTENSION = ".pem"
-        full_path = path + file_name + CERT_EXTENSION
+        full_path = os.path.join(path, file_name + CERT_EXTENSION)
+
+        if not os.path.isfile(full_path):
+            # File does not exist
+            return False
 
         self.file_create_directory(path)
 
@@ -143,4 +157,6 @@ class CertificateIO:
             ca_cert = x509.load_pem_x509_certificate(cert_file.read())
             self.certificate = ca_cert
             self.public_key = ca_cert.public_key()
+
+        return True
 

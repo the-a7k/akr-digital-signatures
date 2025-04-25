@@ -35,4 +35,6 @@ class CertificateUser(CertificateIO):
                 .sign(self.private_key, hashes.SHA256())  # Signing CSR with private key of a user
         )
         self.csr = csr
+        
+        return True
 

@@ -2,7 +2,7 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from datetime import datetime, timezone
+from datetime import datetime
 from certificate_io import CertificateIO
 
 
@@ -45,6 +45,7 @@ class CertificateAuthority(CertificateIO):
         )
 
         self.certificate = certificate
+        return True
 
     def issue_certificate(self, user_cert_instance, not_valid_before, not_valid_after, path, file_name):
         # Issue a certificate for user on Certificate Signing Request (CSR) from user and save the certificate
@@ -71,13 +72,21 @@ class CertificateAuthority(CertificateIO):
         self.file_save_certificate(path, file_name, user_cert)
         user_cert_instance.csr = None  # Flushing current attempt to create user certificate
         user_cert_instance.certificate = user_cert
+
+        return True
     
+    def get_certificate_not_valid_before(self):
+        return self.certificate.not_valid_before_utc.astimezone() if self.certificate is not None else None
+    
+    def get_certificate_not_valid_after(self):
+        return self.certificate.not_valid_after_utc.astimezone() if self.certificate is not None else None
+
     def verify_certificate(self, certificate_to_verify):
         # Check if certificate is not expired, issued by CA and signed by CA private key
         if self.certificate is None or self.private_key is None or self.public_key is None or certificate_to_verify is None:
             return False
         
-        current_time = datetime.now(timezone.utc)
+        current_time = datetime.now.astimezone(), # Current time in Prague timezone
         if not certificate_to_verify.not_valid_before_utc <= current_time <= certificate_to_verify.not_valid_after_utc:
             # Certificate is expired or before validity
             return False
@@ -95,8 +104,7 @@ class CertificateAuthority(CertificateIO):
                 certificate_to_verify.signature_hash_algorithm  # Used hashing algorithm
             )
         
-        except Exception:
+        except Exception as e:
             return False
         
         return True
-
