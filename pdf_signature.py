@@ -41,10 +41,12 @@ class PDFSignature(FileSignature):
             with open(normalized_pdf_path, "wb") as normalized_pdf_file:
                 pdf_writer.write(normalized_pdf_file)
         
-        # Uodate the file path to the normalized PDF path
+        # Uodate the file path, hash and signature of the PDF object
         self.file_path = normalized_pdf_path
+        self.hash = self.calculate_SHA256()
+        self.signature = self.calculate_signature()
 
-    def create_signed_pdf(self, output_pdf_path):
+    def create_signature_pdf(self, path):
         with open(self.file_path, "rb") as input_pdf_file:
             pdf_reader = PdfReader(input_pdf_file)
             pdf_writer = PdfWriter()
@@ -57,31 +59,33 @@ class PDFSignature(FileSignature):
             # Update and add new metadata as string to the PDF
             metadata = pdf_reader.metadata
             metadata.update({
-                '/Signature': str(self.signature)
+                "/Signature": FileSignature.int_to_base64(self.signature)
             })
             pdf_writer.add_metadata(metadata)
             
             # Create a new PDF with the updated metadata
-            with open(output_pdf_path, "wb") as output_pdf_file:
+            with open(path, "wb") as output_pdf_file:
                 pdf_writer.write(output_pdf_file)
 
-    @staticmethod
-    def read_signature(pdf_path):
-        with open(pdf_path, "rb") as file:
+
+    def read_signature_pdf(self, path):
+        if not os.path.isfile(path):
+            # File does not exist
+            return False
+
+        with open(path, "rb") as file:
             pdf_reader = PdfReader(file)
             # Read the metadata from the PDF
             metadata = pdf_reader.metadata
-            signature = metadata.get('/Signature', None)
+            signature = metadata.get("/Signature", None)
             
             if signature:
-                return int(signature)
+                return FileSignature.base64_to_int(signature)
             
-            return None
+            return False
     
-    @staticmethod
-    def remove_signature(pdf_path, output_pdf_path):
-        with open(pdf_path, "rb") as input_pdf_file:
-
+    def remove_signature_pdf(self, output_pdf_path):
+        with open(self.file_path, "rb") as input_pdf_file:
             pdf_reader = PdfReader(input_pdf_file)
             pdf_writer = PdfWriter()
             
@@ -94,8 +98,8 @@ class PDFSignature(FileSignature):
             metadata = pdf_reader.metadata
             
             # Remove the signature metadata (if it exists)
-            if '/Signature' in metadata:
-                del metadata['/Signature']
+            if "/Signature" in metadata:
+                del metadata["/Signature"]
             pdf_writer.add_metadata(metadata)
             
             # Save the new PDF without the signature
