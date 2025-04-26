@@ -11,6 +11,7 @@ class CertificateIO:
         self.private_key = None  # Contains RSA key object
         self.public_key =  None  # Contains RSA key object
         self.certificate = None  # Contains x509 certificate object
+        self.CRYPTO_EXTENSION = ".pem"  # Default file extension for private key and certificate files
 
     def __str__(self):
         # Get certificate instance parameters
@@ -76,11 +77,10 @@ class CertificateIO:
 
         self.file_create_directory(path)
 
-        KEY_EXTENSION = ".pem"
-        if (file_name.endswith(KEY_EXTENSION.lower())):
+        if (file_name.endswith(self.CRYPTO_EXTENSION.lower())):
             full_path = os.path.join(path, file_name)
         else:
-            full_path = os.path.join(path, file_name + KEY_EXTENSION)
+            full_path = os.path.join(path, file_name + self.CRYPTO_EXTENSION)
 
         with open(full_path, "wb") as key_file:
             if password is None:
@@ -113,11 +113,10 @@ class CertificateIO:
 
         self.file_create_directory(path)
 
-        CERT_EXTENSION = ".pem"
-        if (file_name.endswith(CERT_EXTENSION.lower())):
+        if (file_name.endswith(self.CRYPTO_EXTENSION.lower())):
             full_path = os.path.join(path, file_name)
         else:
-            full_path = os.path.join(path, file_name + CERT_EXTENSION)
+            full_path = os.path.join(path, file_name + self.CRYPTO_EXTENSION)
 
         with open(full_path, "wb") as cert_file:
             cert_file.write(certificate.public_bytes(serialization.Encoding.PEM))
@@ -126,11 +125,10 @@ class CertificateIO:
 
     def file_load_private_key(self, path, file_name, password=None):
         # Load private key from .pem file
-        KEY_EXTENSION = ".pem"
-        if (file_name.endswith(KEY_EXTENSION.lower())):
+        if (file_name.endswith(self.CRYPTO_EXTENSION.lower())):
             full_path = os.path.join(path, file_name)
         else:
-            full_path = os.path.join(path, file_name + KEY_EXTENSION)
+            full_path = os.path.join(path, file_name + self.CRYPTO_EXTENSION)
 
         if not os.path.isfile(full_path):
             # File does not exist
@@ -153,11 +151,10 @@ class CertificateIO:
 
     def file_load_certificate(self, path, file_name):
         # Load certificate and its public key from .pem file
-        CERT_EXTENSION = ".pem"
-        if (file_name.endswith(CERT_EXTENSION.lower())):
+        if (file_name.endswith(self.CRYPTO_EXTENSION.lower())):
             full_path = os.path.join(path, file_name)
         else:
-            full_path = os.path.join(path, file_name + CERT_EXTENSION)
+            full_path = os.path.join(path, file_name + self.CRYPTO_EXTENSION)
 
         if not os.path.isfile(full_path):
             # File does not exist

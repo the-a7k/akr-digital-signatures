@@ -1,6 +1,7 @@
 import hashlib
 from base64 import b64encode, b64decode
 import os
+import shutil
 
 class FileSignature:
     def __init__(self, rsa_key_object, file_path):
@@ -13,12 +14,15 @@ class FileSignature:
         self.hash = self.calculate_SHA256()             # In integer format
         self.signature = self.calculate_signature()     # In integer format
 
-    def calculate_SHA256(self):
-        # Get the SHA256 hash of the file
+    def calculate_SHA256(self, algorithm="sha256", chunk_size=4096):
+        # Check if the file exists
+
+        h = hashlib.new(algorithm)
         with open(self.file_path, "rb") as f:
-            data = f.read()
-            digest = hashlib.sha256(data).digest()
-            return int.from_bytes(digest, byteorder="big")
+            while chunk := f.read(chunk_size):
+                h.update(chunk)
+        digest_bytes = h.digest() 
+        return int.from_bytes(digest_bytes, byteorder="big")
 
     def calculate_signature(self):
         # Hash ^ PrivateExponent mod Modulus = RSA Signature
@@ -43,6 +47,20 @@ class FileSignature:
 
         with open(path, "r") as f:
             return FileSignature.base64_to_int(f.read())
+
+    @staticmethod 
+    def file_create_directory(path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    @staticmethod
+    def file_remove_directory(path):
+        # Remove the directory and all its contents
+        try:
+            shutil.rmtree(path)
+            return True
+        except Exception as e:
+            return False
         
     @staticmethod
     def int_to_base64(number):

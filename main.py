@@ -4,6 +4,7 @@ import constants as const
 from datetime import datetime, timedelta
 from pdf_signature import PDFSignature
 from file_signature import FileSignature
+from png_signature import PNGSignature
 from os import path
 
 
@@ -48,34 +49,49 @@ if __name__ == "__main__":
     user = CertificateUser()
     user.generate_keys_rsa()
 
-    input_pdf_path = path.join("filetest", "input.pdf")                                         # Original PDF to be signed
-    output_pdf_path_with_signature = path.join("filetest", "output_with_signature.pdf")         # PDF with signature in metadata
-    output_pdf_path_without_signature = path.join("filetest", "output_without_signature.pdf")   # PDF to be checked against the original one
+    input_pdf_path = path.join("filetest", "pdf_testing.pdf")                                       # Original PDF to be signed
+    output_pdf_path_with_signature = path.join("filetest", "pdf_testing_signature.pdf")             # PDF with signature in metadata
+    output_pdf_path_without_signature = path.join("filetest", "pdf_testing_without_signature.pdf")  # PDF to be checked against the original one
+
 
     # 1) Signature in the metadata of PDF
 
     og_pdf = PDFSignature(user.private_key, input_pdf_path)         # OG PDF object
     og_pdf.normalize_pdf(const.FILE_TEMP_DIRECTORY)                 # Create a normalized copy of the OG PDF
     og_pdf.create_signature_pdf(output_pdf_path_with_signature)     # Create a new PDF from the normalized one with the signature in the metadata    
-    og_pdf.remove_signature_pdf(output_pdf_path_without_signature)  # Create a new PDF by removing the signature from the signed PDF
+    og_pdf.remove_signature_pdf(output_pdf_path_with_signature, output_pdf_path_without_signature)  # Create a new PDF by removing the signature from the signed PDF
 
     generated_og_pdf = PDFSignature(user.private_key, output_pdf_path_without_signature)  # New PDF object from the unsigned PDF
     print("Shoduji se podpisy puvodniho a kontrolovaneho pdf?", og_pdf.compare_signature(generated_og_pdf.signature))
 
+    # 2) Signature in the metadata of PNG
 
-    # 2) Signature in separate file
+    input_png_path = path.join("filetest", "png_testing.png")
+    output_png_path_with_signature = path.join("filetest", "png_testing_signature.png")  
+    output_png_path_without_signature = path.join("filetest", "png_testing_without_signature.png")
 
-    input_sig_path = path.join("filetest", "separate_signature_og.sig")
-    output_sig_path = path.join("filetest", "separate_signature_generated.sig")
+    png = PNGSignature(user.private_key, input_png_path)
+    png.normalize_png(const.FILE_TEMP_DIRECTORY)
+    png.create_signature_png(output_png_path_with_signature)
+    png.remove_signature_png(output_png_path_with_signature, output_png_path_without_signature)
 
-    og_pdf.create_signature_file(input_sig_path)
-    og_sig = og_pdf.read_signature_file(input_sig_path)
+    new_png = PNGSignature(user.private_key, output_png_path_without_signature)
+    print("Shoduji se podpisy puvodniho a kontrolovaneho png?", png.compare_signature(new_png.signature))
 
-    generated_og_pdf.create_signature_file(output_sig_path)
-    generated_og_sig = generated_og_pdf.read_signature_file(output_sig_path)
 
-    print("Shoduji se podpisy puvodniho pdf a kontrolovaneho sig souboru?", og_pdf.compare_signature(generated_og_sig))
+    # 3) Signature in separate file
+
+    input_sig_path = path.join("filetest", "png_signature_og.sig")
+    output_sig_path = path.join("filetest", "png_signature_generated.sig")
+
+    png.create_signature_file(input_sig_path)
+    og_sig = png.read_signature_file(input_sig_path)
+
+    new_png.create_signature_file(output_sig_path)
+    generated_og_sig = new_png.read_signature_file(output_sig_path)
+
+    print("Shoduji se podpisy puvodniho pdf a kontrolovaneho sig souboru?", png.compare_signature(new_png.signature))
     print("Shoduji se podpisy sig mezi sebou?", og_sig == generated_og_sig)
 
 
-    PDFSignature.file_remove_directory(const.FILE_TEMP_DIRECTORY)  # Temp directory cleanup
+    FileSignature.file_remove_directory(const.FILE_TEMP_DIRECTORY)  # Temp directory cleanup
