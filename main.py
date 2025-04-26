@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from pdf_signature import PDFSignature
 from file_signature import FileSignature
 from png_signature import PNGSignature
+from mp3_signature import MP3Signature
 from os import path
 
 
@@ -93,5 +94,20 @@ if __name__ == "__main__":
     print("Shoduji se podpisy puvodniho pdf a kontrolovaneho sig souboru?", png.compare_signature(new_png.signature))
     print("Shoduji se podpisy sig mezi sebou?", og_sig == generated_og_sig)
 
+
+    # 4) Signature in MP3 file
+    input_mp3_path = path.join("filetest", "mp3_testing.mp3")
+    output_mp3_path = path.join("filetest", "mp3_testing_copy.mp3")
+
+    mp3 = MP3Signature(user.private_key, input_mp3_path)
+    mp3.create_copy_mp3(output_mp3_path) 
+    
+    mp3.create_signature_mp3()
+    mp32 = MP3Signature(user.private_key, output_mp3_path)
+    mp32.create_signature_mp3()
+    print("Shoduji se podpisy puvodniho MP3 a kontrolovaneho MP3 souboru?", mp3.compare_signature(mp32.signature))
+
+    mp3.remove_signature_mp3()
+    mp32.remove_signature_mp3()
 
     FileSignature.file_remove_directory(const.FILE_TEMP_DIRECTORY)  # Temp directory cleanup
