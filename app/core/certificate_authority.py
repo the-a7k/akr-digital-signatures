@@ -3,7 +3,7 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from datetime import datetime
-from certificate_io import CertificateIO
+from .certificate_io import CertificateIO
 
 
 class CertificateAuthority(CertificateIO):

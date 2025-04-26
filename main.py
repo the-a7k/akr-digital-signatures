@@ -1,11 +1,14 @@
-from certificate_authority import CertificateAuthority
-from certificate_user import CertificateUser
-import constants as const
+import app.core.project_constants as const
+from app.core.certificate_authority import CertificateAuthority
+from app.core.certificate_user import CertificateUser
+from app.core.certificate_io import CertificateIO
+
+from app.signatures.pdf_signature import PDFSignature
+from app.signatures.file_signature import FileSignature
+from app.signatures.png_signature import PNGSignature
+from app.signatures.mp3_signature import MP3Signature
+
 from datetime import datetime, timedelta
-from pdf_signature import PDFSignature
-from file_signature import FileSignature
-from png_signature import PNGSignature
-from mp3_signature import MP3Signature
 from os import path
 
 
@@ -50,9 +53,9 @@ if __name__ == "__main__":
     user = CertificateUser()
     user.generate_keys_rsa()
 
-    input_pdf_path = path.join("filetest", "pdf_testing.pdf")                                       # Original PDF to be signed
-    output_pdf_path_with_signature = path.join("filetest", "pdf_testing_signature.pdf")             # PDF with signature in metadata
-    output_pdf_path_without_signature = path.join("filetest", "pdf_testing_without_signature.pdf")  # PDF to be checked against the original one
+    input_pdf_path = path.join("resources", "example", "pdf_testing.pdf")                                       # Original PDF to be signed
+    output_pdf_path_with_signature = path.join("resources", "example",  "pdf_testing_signature.pdf")             # PDF with signature in metadata
+    output_pdf_path_without_signature = path.join("resources", "example", "pdf_testing_without_signature.pdf")  # PDF to be checked against the original one
 
 
     # 1) Signature in the metadata of PDF
@@ -67,9 +70,9 @@ if __name__ == "__main__":
 
     # 2) Signature in the metadata of PNG
 
-    input_png_path = path.join("filetest", "png_testing.png")
-    output_png_path_with_signature = path.join("filetest", "png_testing_signature.png")  
-    output_png_path_without_signature = path.join("filetest", "png_testing_without_signature.png")
+    input_png_path = path.join("resources", "example",  "png_testing.png")
+    output_png_path_with_signature = path.join("resources", "example",  "png_testing_signature.png")  
+    output_png_path_without_signature = path.join("resources", "example",  "png_testing_without_signature.png")
 
     png = PNGSignature(user.private_key, input_png_path)
     png.normalize_png(const.FILE_TEMP_DIRECTORY)
@@ -82,8 +85,8 @@ if __name__ == "__main__":
 
     # 3) Signature in separate file
 
-    input_sig_path = path.join("filetest", "png_signature_og.sig")
-    output_sig_path = path.join("filetest", "png_signature_generated.sig")
+    input_sig_path = path.join("resources", "example", "png_signature_og.sig")
+    output_sig_path = path.join("resources", "example", "png_signature_generated.sig")
 
     png.create_signature_file(input_sig_path)
     og_sig = png.read_signature_file(input_sig_path)
@@ -96,8 +99,8 @@ if __name__ == "__main__":
 
 
     # 4) Signature in MP3 file
-    input_mp3_path = path.join("filetest", "mp3_testing.mp3")
-    output_mp3_path = path.join("filetest", "mp3_testing_copy.mp3")
+    input_mp3_path = path.join("resources", "example", "mp3_testing.mp3")
+    output_mp3_path = path.join("resources", "example", "mp3_testing_copy.mp3")
 
     mp3 = MP3Signature(user.private_key, input_mp3_path)
     mp3.create_copy_mp3(output_mp3_path) 
@@ -110,4 +113,4 @@ if __name__ == "__main__":
     mp3.remove_signature_mp3()
     mp32.remove_signature_mp3()
 
-    FileSignature.file_remove_directory(const.FILE_TEMP_DIRECTORY)  # Temp directory cleanup
+    FileSignature.directory_remove(const.FILE_TEMP_DIRECTORY)  # Temp directory cleanup

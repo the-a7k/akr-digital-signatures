@@ -1,8 +1,7 @@
+from .file_signature import FileSignature
 from PyPDF2 import PdfReader, PdfWriter
-from file_signature import FileSignature
 from time import time
 import os
-import shutil
 
 class PDFSignature(FileSignature):
     def __init__(self, rsa_key_object, file_path):
@@ -21,7 +20,7 @@ class PDFSignature(FileSignature):
                 page = pdf_reader.pages[page_num]
                 pdf_writer.add_page(page)
 
-            FileSignature.file_create_directory(temp_directory)
+            FileSignature.directory_create(temp_directory)
 
             # Save the normalized PDF to a temporary directory with a unique name (according to UNIX timestamp)
             normalized_pdf_path = os.path.join(temp_directory, str(int(time())) + self.PDF_EXTENSION)
@@ -30,7 +29,7 @@ class PDFSignature(FileSignature):
         
         # Uodate the file path, hash and signature of the PDF object
         self.file_path = normalized_pdf_path
-        self.hash = self.calculate_SHA256()
+        self.hash = self.calculate_hash()
         self.signature = self.calculate_signature()
 
     def create_signature_pdf(self, path):
@@ -44,7 +43,7 @@ class PDFSignature(FileSignature):
                 page = pdf_reader.pages[page_num]
                 pdf_writer.add_page(page)
             
-            # Update and add new metadata as string to the PDF
+            # Update and add new metadata (in base64) as string to the PDF
             metadata = pdf_reader.metadata
             metadata.update({
                 self.METADATA_NAME: FileSignature.int_to_base64(self.signature)

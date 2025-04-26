@@ -1,3 +1,4 @@
 cryptography>=44.0.2
 PyPDF2>=3.0.1
 pillow>=11.2.1
+mutagen>=1.47.0
