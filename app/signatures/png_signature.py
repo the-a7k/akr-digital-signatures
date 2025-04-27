@@ -36,7 +36,6 @@ class PNGSignature(FileSignature):
             meta.add_text(self.METADATA_NAME, FileSignature.int_to_base64(self.signature))
             img.save(path, self.PIL_EXTENSION, pnginfo=meta)
         except Exception as e:
-            print(f"Error creating PNG signature: {e}")
             return False
 
     def read_signature_png(self, path):
@@ -63,5 +62,4 @@ class PNGSignature(FileSignature):
             img.save(output_path, self.PIL_EXTENSION, pnginfo=new_info)
 
         except Exception as e:
-            print(f"Error removing PNG signature: {e}")
             return False

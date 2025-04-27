@@ -111,6 +111,7 @@ class CertificateIO:
             # Trying to save uninitialized certificate value
             return False
 
+
         self.file_create_directory(path)
 
         if (file_name.endswith(self.CRYPTO_EXTENSION.lower())):

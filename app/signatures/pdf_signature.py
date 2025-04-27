@@ -3,6 +3,7 @@ from PyPDF2 import PdfReader, PdfWriter
 from time import time
 import os
 
+
 class PDFSignature(FileSignature):
     def __init__(self, rsa_key_object, file_path):
         super().__init__(rsa_key_object, file_path)

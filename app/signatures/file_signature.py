@@ -32,7 +32,7 @@ class FileSignature:
         # Hash ^ PrivateExponent mod Modulus = RSA Signature
         return self.signature == signature_to_verify_int
 
-    def compare_SHA256(self, hash_to_verify_int):
+    def compare_hash(self, hash_to_verify_int):
         # RSA Signature ^ PublicExponent mod Modulus = Hash
         return hash_to_verify_int == self.hash
 
@@ -75,6 +75,3 @@ class FileSignature:
         # Convert a base64 string to an integer
         byte_array = b64decode(b64_string)
         return int.from_bytes(byte_array, byteorder="big")
-
-
-

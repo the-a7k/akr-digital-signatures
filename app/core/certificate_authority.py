@@ -86,8 +86,7 @@ class CertificateAuthority(CertificateIO):
         if self.certificate is None or self.private_key is None or self.public_key is None or certificate_to_verify is None:
             return False
         
-        current_time = datetime.now.astimezone(), # Current time in Prague timezone
-        if not certificate_to_verify.not_valid_before_utc <= current_time <= certificate_to_verify.not_valid_after_utc:
+        if not certificate_to_verify.not_valid_before_utc <= datetime.now().astimezone() <= certificate_to_verify.not_valid_after_utc:
             # Certificate is expired or before validity
             return False
 
