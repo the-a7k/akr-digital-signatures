@@ -92,7 +92,7 @@ class CertificateAuthority(CertificateIO):
 
         if certificate_to_verify.issuer != self.certificate.subject:
             # Certificate issuer is not CA
-            raise False
+            return False
         
         # Verify signage
         try:
